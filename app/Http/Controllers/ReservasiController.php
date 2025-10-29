@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ReservasiDikonfirmasi;
 use App\Models\Pelanggan;
 use App\Models\Reservasi;
 
@@ -34,13 +36,15 @@ class ReservasiController extends Controller
             ['nama' => $request->nama,'nomor_hp' => $request->nomor_hp ?? '-']
         );
 
-        Reservasi::create([
+        $reservasi = Reservasi::create([
             'pelanggan_id' => $pelanggan->id,
             'tanggal' => $request->tanggal,
             'waktu' => $request->waktu,
             'jumlah_orang' => $request->jumlah_orang,
             'status' => 'Dikonfirmasi'
         ]);
+
+        Mail::to($pelanggan->email)->send(new ReservasiDikonfirmasi($reservasi));
 
         return redirect()->back()->with('success', 'Reservasi berhasil dibuat!');
     }
